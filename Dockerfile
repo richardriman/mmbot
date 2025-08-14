@@ -13,7 +13,7 @@ COPY . /mmbot
 
 RUN ./update
 
-FROM debian:bookworm-slim as mmbot
+FROM debian:bookworm-slim AS mmbot
 
 WORKDIR /mmbot
 
