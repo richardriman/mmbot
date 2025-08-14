@@ -27,4 +27,4 @@ COPY --from=stage /mmbot /mmbot
 
 EXPOSE 10000
 
-CMD bin/mmbot -p 10000 run
+CMD ['bin/mmbot', '-p', '10000', 'run']
