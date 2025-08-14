@@ -92,19 +92,6 @@ IStrategy::OrderData Strategy_Pile::getNewOrder(
 	double accum = cfg.accum * np/new_price;
 	finPos += accum;
 	double diff = finPos - assets;
-
-	// Check minimum order size to avoid NOTIONAL filter failures
-	double minSize = minfo.calcMinSize(new_price);
-	if (std::abs(diff) < minSize) {
-		// If the order is too small, either round up to minimum or cancel
-		if (std::abs(diff) < minSize * 0.5) {
-			diff = 0; // Cancel very small orders
-		} else {
-			// Round up to minimum size, preserving direction
-			diff = diff > 0 ? minSize : -minSize;
-		}
-	}
-
 	return {0, diff};
 }
 

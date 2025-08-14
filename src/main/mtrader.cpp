@@ -595,6 +595,19 @@ void MTrader::setOrder(std::optional<IStockApi::Order> &orig, Order neworder, st
     }
 
     IStockApi::Order n {json::undefined, secondary?magic2:magic, neworder.size, neworder.price};
+    
+    // Additional check for minimum notional value before placing order
+    double notional = std::abs(n.size * n.price);
+    if (notional < minfo.min_volume && notional > 0) {
+        // Order is too small for minimum notional, cancel it
+        logWarning("Order notional too small - notional: $1, min_notional: $2, size: $3, price: $4", 
+                   notional, minfo.min_volume, std::abs(n.size), n.price);
+        alert = AlertInfo{neworder.price, AlertReason::below_minsize};
+        neworder.size = 0;
+        neworder.update(orig);
+        return;
+    }
+    
     try {
         json::Value replaceid;
         double replaceSize = 0;
@@ -722,9 +735,15 @@ bool MTrader::calculateOrderFeeLessAdjust(Order &order, double position, double 
     order.size = minfo.adjValue(order.size, minfo.asset_step, adjust_assets);
 
     //if order size is below min_size, adjust to zero
-    if (std::fabs(order.size) < minfo.calcMinSize(order.price)) order.size = 0;
+    if (std::fabs(order.size) < minfo.calcMinSize(order.price)) {
+        double minSize = minfo.calcMinSize(order.price);
+        logInfo("Order too small - size: $1, min_size: $2, price: $3, min_notional: $4", 
+                std::fabs(order.size), minSize, order.price, minfo.min_volume);
+        order.size = 0;
+    }
 
-    order.size = minfo.adjValue(order.size, minfo.asset_step, adjust_assets);
+    // Don't call adjValue again after setting to zero - it might create tiny non-zero values
+    // order.size = minfo.adjValue(order.size, minfo.asset_step, adjust_assets);
 
     if (order.size == 0) {
         order.ar = AlertReason::below_minsize;
