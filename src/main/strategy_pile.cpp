@@ -93,11 +93,12 @@ IStrategy::OrderData Strategy_Pile::getNewOrder(
 	finPos += accum;
 	double diff = finPos - assets;
 
-	// Ensure order meets minimum size requirements
+	// Check minimum order requirements 
 	double minSize = minfo.calcMinSize(new_price);
 	if (std::abs(diff) > 0 && std::abs(diff) < minSize) {
-		// Round up to minimum size, preserving direction
-		diff = diff > 0 ? minSize : -minSize;
+		// If original order would be too small, skip it instead of enlarging
+		// This prevents creating artificially large orders when strategy wants small adjustments
+		diff = 0;
 	}
 
 	return {0, diff};
