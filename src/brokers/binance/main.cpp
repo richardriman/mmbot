@@ -715,15 +715,41 @@ void Interface::initSymbols() {
 				nfo.quote_precision = smb["quotePrecision"].getUInt();
 				for (Value f: smb["filters"]) {
 					auto ft = f["filterType"].getString();
+
+					// Debug logging for BTC/USDC specifically - log ALL filters
+					if (symbol == "BTCUSDC") {
+						std::cerr << "DEBUG: BTCUSDC filter: " << ft << " = " << f.toString() << std::endl;
+					}
+
 					if (ft == "LOT_SIZE") {
 						nfo.min_size = f["minQty"].getNumber();
 						nfo.asset_step = f["stepSize"].getNumber();
 					} else if (ft == "PRICE_FILTER") {
 						nfo.currency_step = f["tickSize"].getNumber();
 					} else if (ft == "MIN_NOTIONAL") {
-						nfo.min_volume = f["minNotional"].getNumber();
+						if (f["minNotional"].defined()) {
+							nfo.min_volume = f["minNotional"].getNumber();
+						} else if (f["notional"].defined()) {
+							// Some symbols use "notional" field instead of "minNotional"
+							nfo.min_volume = f["notional"].getNumber();
+						}
+					} else if (ft == "NOTIONAL") {
+						// Some symbols use NOTIONAL filter type instead of MIN_NOTIONAL
+						if (f["minNotional"].defined()) {
+							nfo.min_volume = f["minNotional"].getNumber();
+						} else if (f["notional"].defined()) {
+							nfo.min_volume = f["notional"].getNumber();
+						}
 					}
 				}
+
+				// Debug logging for BTC/USDC specifically
+				if (symbol == "BTCUSDC") {
+					std::cerr << "DEBUG: Final BTCUSDC - min_volume: " << nfo.min_volume 
+					         << ", min_size: " << nfo.min_size 
+					         << ", asset_step: " << nfo.asset_step << std::endl;
+				}
+
 				nfo.cat = Category::spot;
 				nfo.wallet_id="spot";
 

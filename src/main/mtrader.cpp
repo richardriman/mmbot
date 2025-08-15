@@ -595,19 +595,19 @@ void MTrader::setOrder(std::optional<IStockApi::Order> &orig, Order neworder, st
     }
 
     IStockApi::Order n {json::undefined, secondary?magic2:magic, neworder.size, neworder.price};
-    
+
     // Additional check for minimum notional value before placing order
     double notional = std::abs(n.size * n.price);
     if (notional < minfo.min_volume && notional > 0) {
         // Order is too small for minimum notional, cancel it
-        logWarning("Order notional too small - notional: $1, min_notional: $2, size: $3, price: $4", 
+        logWarning("Order notional too small - notional: $1, min_notional: $2, size: $3, price: $4",
                    notional, minfo.min_volume, std::abs(n.size), n.price);
         alert = AlertInfo{neworder.price, AlertReason::below_minsize};
         neworder.size = 0;
         neworder.update(orig);
         return;
     }
-    
+
     try {
         json::Value replaceid;
         double replaceSize = 0;
@@ -737,8 +737,15 @@ bool MTrader::calculateOrderFeeLessAdjust(Order &order, double position, double 
     //if order size is below min_size, adjust to zero
     if (std::fabs(order.size) < minfo.calcMinSize(order.price)) {
         double minSize = minfo.calcMinSize(order.price);
-        logInfo("Order too small - size: $1, min_size: $2, price: $3, min_notional: $4", 
-                std::fabs(order.size), minSize, order.price, minfo.min_volume);
+        logInfo("Order too small - size: $1, min_size: $2, price: $3, min_notional: $4, symbol: $5, asset_step: $6, min_size_raw: $7",
+                std::fabs(order.size), minSize, order.price, minfo.min_volume, cfg.pairsymb, minfo.asset_step, minfo.min_size);
+
+        // Additional debug for BTC/USDC specifically
+        if (minfo.min_volume == 0) {
+            logWarning("Symbol $1 has min_notional=0! This suggests missing MIN_NOTIONAL filter from exchange. asset_symbol: $2, currency_symbol: $3",
+                       cfg.pairsymb, minfo.asset_symbol, minfo.currency_symbol);
+        }
+
         order.size = 0;
     }
 
