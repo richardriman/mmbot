@@ -600,7 +600,7 @@ void MTrader::setOrder(std::optional<IStockApi::Order> &orig, Order neworder, st
     double notional = std::abs(n.size * n.price);
     if (notional < minfo.min_volume && notional > 0) {
         // Order is too small for minimum notional, cancel it
-        logWarning("Order notional too small - notional: $1, min_notional: $2, size: $3, price: $4",
+        logWarning("Order notional too small - notional: %.2f, min_notional: %.2f, size: %.8f, price: %.2f",
                    notional, minfo.min_volume, std::abs(n.size), n.price);
         alert = AlertInfo{neworder.price, AlertReason::below_minsize};
         neworder.size = 0;
@@ -737,7 +737,7 @@ bool MTrader::calculateOrderFeeLessAdjust(Order &order, double position, double 
     //if order size is below min_size, adjust to zero
     if (std::fabs(order.size) < minfo.calcMinSize(order.price)) {
         double minSize = minfo.calcMinSize(order.price);
-        logInfo("Order too small - size: $1, min_size: $2, price: $3, min_notional: $4, symbol: $5, asset_step: $6, min_size_raw: $7",
+        logInfo("Order too small - size: %.8f, min_size: %.8f, price: %.2f, min_notional: %.2f, symbol: $5, asset_step: %.8f, min_size_raw: %.8f",
                 std::fabs(order.size), minSize, order.price, minfo.min_volume, cfg.pairsymb, minfo.asset_step, minfo.min_size);
 
         // Additional debug for BTC/USDC specifically
