@@ -715,12 +715,6 @@ void Interface::initSymbols() {
 				nfo.quote_precision = smb["quotePrecision"].getUInt();
 				for (Value f: smb["filters"]) {
 					auto ft = f["filterType"].getString();
-
-					// Debug logging for BTC/USDC specifically - log ALL filters
-					if (symbol == "BTCUSDC") {
-						std::cerr << "DEBUG: BTCUSDC filter: " << ft << " = " << f.toString() << std::endl;
-					}
-
 					if (ft == "LOT_SIZE") {
 						nfo.min_size = f["minQty"].getNumber();
 						nfo.asset_step = f["stepSize"].getNumber();
@@ -742,14 +736,6 @@ void Interface::initSymbols() {
 						}
 					}
 				}
-
-				// Debug logging for BTC/USDC specifically
-				if (symbol == "BTCUSDC") {
-					std::cerr << "DEBUG: Final BTCUSDC - min_volume: " << nfo.min_volume 
-					         << ", min_size: " << nfo.min_size 
-					         << ", asset_step: " << nfo.asset_step << std::endl;
-				}
-
 				nfo.cat = Category::spot;
 				nfo.wallet_id="spot";
 

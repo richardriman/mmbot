@@ -96,8 +96,9 @@ IStrategy::OrderData Strategy_Pile::getNewOrder(
 
 	// Debug logging for pile strategy calculations
 	if (std::abs(diff) < 1e-8) {
-		ondra_shared::logInfo("Pile strategy: no trade needed - finPos: $1, assets: $2, diff: $3, price: $4, ratio: $5, kmult: $6",
-		                      finPos, assets, diff, new_price, cfg.ratio, st.kmult);
+		using ondra_shared::logInfo;
+		logInfo("Pile strategy: no trade needed - finPos: $1, assets: $2, diff: $3, price: $4, ratio: $5, kmult: $6",
+		        finPos, assets, diff, new_price, cfg.ratio, st.kmult);
 	}
 
 	return {0, diff};
