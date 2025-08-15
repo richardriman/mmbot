@@ -9,7 +9,8 @@
 #include "strategy_pile.h"
 #include <stdexcept>
 #include <cmath>
-#include <ondra_shared/logOutput.h>
+
+using ondra_shared::logInfo;
 Strategy_Pile::Strategy_Pile(const Config &cfg):cfg(cfg) {}
 Strategy_Pile::Strategy_Pile(const Config &cfg, State &&st):cfg(cfg),st(std::move(st)) {}
 
@@ -96,7 +97,6 @@ IStrategy::OrderData Strategy_Pile::getNewOrder(
 
 	// Debug logging for pile strategy calculations
 	if (std::abs(diff) < 1e-8) {
-		using ondra_shared::logInfo;
 		logInfo("Pile strategy: no trade needed - finPos: $1, assets: $2, diff: $3, price: $4, ratio: $5, kmult: $6",
 		        finPos, assets, diff, new_price, cfg.ratio, st.kmult);
 	}
